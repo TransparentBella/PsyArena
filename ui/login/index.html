@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CommentRanking · 登录</title>
+    <link rel="stylesheet" href="/ui/style.css" />
+    <link rel="stylesheet" href="/ui/login/login.css" />
+  </head>
+  <body>
+    <div class="authPage">
+      <div class="authCard">
+        <div class="authTitle">登录</div>
+        <div class="muted">普通用户登录后进入标注页，管理员可访问统计与导出</div>
+
+        <div class="authForm">
+          <label class="label" for="usernameInput">账号</label>
+          <input id="usernameInput" class="authInput" placeholder="管理员账号或昵称" />
+
+          <label class="label" for="passwordInput">密码</label>
+          <input id="passwordInput" class="authInput" placeholder="密码" type="password" />
+
+          <div class="row">
+            <button id="loginBtn" class="btn btn--primary">登录</button>
+            <a class="btn btn--ghost" href="/ui/register/">注册</a>
+          </div>
+        </div>
+
+        <div id="resetBox" class="resetBox" hidden>
+          <div class="authTitle">首次登录需要改密</div>
+          <div class="muted">请设置新密码后再继续</div>
+          <label class="label" for="newPasswordInput">新密码</label>
+          <input id="newPasswordInput" class="authInput" placeholder="新密码" type="password" />
+          <div class="row">
+            <button id="changePwdBtn" class="btn btn--primary">确认改密</button>
+            <button id="logoutBtn" class="btn btn--ghost">退出</button>
+          </div>
+        </div>
+
+        <div id="statusText" class="muted"></div>
+      </div>
+    </div>
+
+    <script type="module" src="/ui/login/login.js"></script>
+  </body>
+</html>
+

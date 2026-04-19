@@ -1,0 +1,129 @@
+.detailPage {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.detailHeader {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.detailTitle {
+  font-weight: 800;
+  font-size: 18px;
+}
+
+.detailActions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.detailMain {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.topGrid {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 14px;
+}
+
+.panel {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 12px;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
+}
+
+.panelTitle {
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.tabBtn {
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-weight: 800;
+}
+
+.tabBtn--active {
+  background: rgba(29, 78, 216, 0.12);
+  border-color: rgba(29, 78, 216, 0.35);
+}
+
+.judgmentList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.judgmentItem {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 10px;
+}
+
+.judgmentMeta {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  color: var(--muted);
+  font-size: 12px;
+  margin-bottom: 8px;
+}
+
+.rankingFlow {
+  font-weight: 800;
+  line-height: 1.4;
+}
+
+.statsTable {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.statsRow {
+  display: grid;
+  grid-template-columns: 1.4fr 0.6fr 0.6fr 0.8fr;
+  gap: 8px;
+  align-items: center;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 8px;
+  background: #ffffff;
+  font-size: 12px;
+}
+
+.previewBox {
+  margin-top: 10px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 10px;
+  max-height: 320px;
+  overflow: auto;
+  white-space: pre-wrap;
+}

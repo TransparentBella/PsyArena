@@ -1,0 +1,70 @@
+﻿<!doctype html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CommentRanking · 单场详情</title>
+    <link rel="stylesheet" href="/ui/style.css" />
+    <link rel="stylesheet" href="/ui/stats/match.css" />
+    <style>
+      body {
+        visibility: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="adminShell">
+      <aside id="sidebar-root" class="adminSidebar"></aside>
+      <div class="adminMain">
+        <div class="detailPage">
+          <header class="detailHeader">
+            <div>
+              <div class="detailTitle">单场详情</div>
+              <div id="metaText" class="muted"></div>
+            </div>
+            <div class="detailActions">
+              <button id="exportJsonlBtn" class="btn btn--ghost">导出 JSONL</button>
+              <button id="exportCsvBtn" class="btn btn--ghost">导出 CSV</button>
+            </div>
+          </header>
+
+          <main class="detailMain">
+            <div class="topGrid">
+              <div class="panel">
+                <video id="video" class="video" controls playsinline></video>
+              </div>
+              <div class="panel">
+                <div class="panelTitle">偏好统计</div>
+                <div class="muted">第一名占比 / 平均名次 / 两两胜率</div>
+                <div id="statsTable" class="statsTable"></div>
+              </div>
+            </div>
+
+            <div class="panel panelTabs">
+              <div class="tabs">
+                <button class="tabBtn" data-tab="audio">仅音频</button>
+                <button class="tabBtn" data-tab="text">仅文本</button>
+                <button class="tabBtn" data-tab="both">混合</button>
+              </div>
+              <div id="list" class="judgmentList"></div>
+            </div>
+
+            <div class="panel">
+              <div class="panelTitle">导出预览（JSONL）</div>
+              <div class="muted">默认展示前 50 行（按 match 过滤）</div>
+              <div class="row">
+                <button id="previewBtn" class="btn btn--ghost">刷新预览</button>
+              </div>
+              <pre id="previewBox" class="previewBox"></pre>
+            </div>
+
+            <div id="statusText" class="muted"></div>
+          </main>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="/ui/admin/sidebar.js"></script>
+    <script type="module" src="/ui/stats/match.js"></script>
+  </body>
+</html>

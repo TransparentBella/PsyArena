@@ -1,0 +1,25 @@
+# --- Virtual environments ---
+.venv-arena/
+.venv/
+.venv-*/
+venv/
+env/
+ENV/
+
+# --- Python cache / build artifacts ---
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# --- Local runtime data ---
+data/app.db
+*.db-shm
+*.db-wal
+
+# --- Temporary files ---
+*.tmp
+*.log
+*.pid
+*.lock
+__tmp_*.pyc.*

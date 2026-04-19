@@ -1,0 +1,73 @@
+{
+  "version": "0.2",
+  "matches": [
+    {
+      "match_id": "test1",
+      "title": "TeamA vs TeamB vs TeamC",
+      "league": "DemoLeague",
+      "date": "2026-04-07",
+      "length_sec": 26,
+      "video": { "path": "matches/test1/video.mp4" },
+      "commentaries": [
+        {
+          "commentary_id": "test1_c1",
+          "type": "both",
+          "language": "zh",
+          "source": "甲",
+          "text": { "path": "matches/test1/commentary/c1/test1.txt", "format": "txt" },
+          "audio": { "path": "matches/test1/commentary/c1/test1_audio1.wav", "format": "wav" }
+        },
+        {
+          "commentary_id": "test1_c2",
+          "type": "both",
+          "language": "zh",
+          "source": "乙",
+          "text": { "path": "matches/test1/commentary/c2/test2.txt", "format": "txt" },
+          "audio": { "path": "matches/test1/commentary/c2/test1_audio2.wav", "format": "wav" }
+        },
+        {
+          "commentary_id": "test1_c3",
+          "type": "both",
+          "language": "zh",
+          "source": "丙",
+          "text": { "path": "matches/test1/commentary/c3/test3.txt", "format": "txt" },
+          "audio": { "path": "matches/test1/commentary/c3/test1_audio3.wav", "format": "wav" }
+        }
+      ]
+    },
+    {
+      "match_id": "test2",
+      "title": "TeamD vs TeamE vs TeamF",
+      "league": "DemoLeague",
+      "date": "2026-04-08",
+      "length_sec": 26,
+      "video": { "path": "matches/test2/video.mp4" },
+      "commentaries": [
+        {
+          "commentary_id": "test2_c1",
+          "type": "both",
+          "language": "zh",
+          "source": "甲",
+          "text": { "path": "matches/test2/commentary/c1/test1.txt", "format": "txt" },
+          "audio": { "path": "matches/test2/commentary/c1/test2_audio1.wav", "format": "wav" }
+        },
+        {
+          "commentary_id": "test2_c2",
+          "type": "both",
+          "language": "zh",
+          "source": "乙",
+          "text": { "path": "matches/test2/commentary/c2/test2.txt", "format": "txt" },
+          "audio": { "path": "matches/test2/commentary/c2/test2_audio2.wav", "format": "wav" }
+        },
+        {
+          "commentary_id": "test2_c3",
+          "type": "both",
+          "language": "zh",
+          "source": "丙",
+          "text": { "path": "matches/test2/commentary/c3/test3.txt", "format": "txt" },
+          "audio": { "path": "matches/test2/commentary/c3/test2_audio3.wav", "format": "wav" }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CommentRanking · 注册</title>
+    <link rel="stylesheet" href="/ui/style.css" />
+    <link rel="stylesheet" href="/ui/login/login.css" />
+  </head>
+  <body>
+    <div class="authPage">
+      <div class="authCard">
+        <div class="authTitle">注册标注账号</div>
+        <div class="muted">昵称需全局唯一；提交后等待管理员审批</div>
+
+        <div class="authForm">
+          <label class="label" for="nicknameInput">昵称（将作为登录账号）</label>
+          <input id="nicknameInput" class="authInput" placeholder="例如：labeler_001" />
+
+          <label class="label" for="passwordInput">密码</label>
+          <input id="passwordInput" class="authInput" placeholder="密码" type="password" />
+
+          <div class="row">
+            <button id="registerBtn" class="btn btn--primary">提交注册</button>
+            <a class="btn btn--ghost" href="/ui/login/">返回登录</a>
+          </div>
+        </div>
+
+        <div id="statusText" class="muted"></div>
+      </div>
+    </div>
+
+    <script type="module" src="/ui/register/register.js"></script>
+  </body>
+</html>
+

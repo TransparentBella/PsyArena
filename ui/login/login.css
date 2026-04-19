@@ -1,0 +1,42 @@
+.authPage {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+}
+
+.authCard {
+  width: min(520px, 92vw);
+  border-radius: 18px;
+  padding: 18px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--border);
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.14);
+  backdrop-filter: blur(8px);
+}
+
+.authTitle {
+  font-size: 20px;
+  font-weight: 900;
+  margin-bottom: 10px;
+}
+
+.authForm {
+  margin-top: 14px;
+}
+
+.authInput {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: #ffffff;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+
+.resetBox {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}

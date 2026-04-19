@@ -1,0 +1,85 @@
+.statsPage {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.statsHeader {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.statsTitle {
+  font-weight: 800;
+  font-size: 18px;
+}
+
+.statsActions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.statsInput {
+  width: 320px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: #ffffff;
+  color: var(--text);
+}
+
+.statsMain {
+  padding: 16px;
+  overflow: auto;
+  flex: 1;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+  margin-top: 12px;
+}
+
+.matchCard {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.95);
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
+}
+
+.matchCard:hover {
+  outline: 2px solid rgba(29, 78, 216, 0.35);
+}
+
+.cover {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  object-fit: cover;
+  display: block;
+}
+
+.matchBody {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.matchId {
+  font-weight: 800;
+}
+
+.counts {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}

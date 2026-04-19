@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CommentRanking · 统计</title>
+    <link rel="stylesheet" href="/ui/style.css" />
+    <link rel="stylesheet" href="/ui/stats/stats.css" />
+    <style>
+      body {
+        visibility: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="adminShell">
+      <aside id="sidebar-root" class="adminSidebar"></aside>
+      <div class="adminMain">
+        <div class="statsPage">
+          <header class="statsHeader">
+            <div>
+              <div class="statsTitle">统计页</div>
+              <div class="muted">点击卡片进入单场详情</div>
+            </div>
+            <div class="statsActions">
+              <input id="queryInput" class="statsInput" placeholder="搜索 match_id / title / league" />
+              <button id="exportJsonlBtn" class="btn btn--ghost">导出 JSONL</button>
+              <button id="exportCsvBtn" class="btn btn--ghost">导出 CSV</button>
+            </div>
+          </header>
+
+          <main class="statsMain">
+            <div id="statusText" class="muted"></div>
+            <div id="grid" class="grid"></div>
+          </main>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="/ui/admin/sidebar.js"></script>
+    <script type="module" src="/ui/stats/stats.js"></script>
+  </body>
+</html>

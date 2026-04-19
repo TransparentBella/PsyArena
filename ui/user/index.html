@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CommentRanking · 消息中心</title>
+    <link rel="stylesheet" href="/ui/style.css" />
+    <link rel="stylesheet" href="/ui/stats/match.css" />
+  </head>
+  <body>
+    <div class="detailPage" style="max-width: 980px; margin: 0 auto; padding: 18px">
+      <header class="detailHeader">
+        <div>
+          <div class="detailTitle">消息中心</div>
+          <div class="muted">待标注任务提醒</div>
+        </div>
+        <div class="detailActions">
+          <button id="goLabelBtn" class="btn btn--primary">去标注</button>
+          <button id="logoutBtn" class="btn btn--ghost">Log out</button>
+        </div>
+      </header>
+
+      <main class="detailMain">
+        <div class="topGrid">
+          <div class="panel">
+            <div class="panelTitle">状态</div>
+            <div id="statusText" class="muted"></div>
+            <div class="judgmentList">
+              <div class="judgmentItem">
+                <div class="judgmentMeta">
+                  <span class="chip">待标注</span>
+                  <span id="pendingCount" class="chip">0</span>
+                </div>
+                <div id="summaryText" class="rankingFlow">加载中…</div>
+              </div>
+              <div class="judgmentItem">
+                <div class="judgmentMeta">
+                  <span class="chip">任务更新时间</span>
+                  <span id="manifestAt" class="chip">-</span>
+                </div>
+                <div class="rankingFlow muted">以任务池同步时间作为“新增时间”参考</div>
+              </div>
+              <div class="judgmentItem">
+                <div class="judgmentMeta">
+                  <span class="chip">上次查看</span>
+                  <span id="lastSeenAt" class="chip">-</span>
+                </div>
+                <div class="rankingFlow muted">进入消息中心后会更新“上次查看”时间</div>
+              </div>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panelTitle">说明</div>
+            <div class="muted">
+              若当前没有可标注任务，将停留在此页；当有新增任务时，“去标注”按钮会可用。
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script type="module" src="/ui/user/user.js"></script>
+  </body>
+</html>

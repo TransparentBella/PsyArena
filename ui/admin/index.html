@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CommentRanking · 管理后台</title>
+    <link rel="stylesheet" href="/ui/style.css" />
+    <link rel="stylesheet" href="/ui/stats/match.css" />
+    <style>
+      body {
+        visibility: hidden;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="adminShell">
+      <aside id="sidebar-root" class="adminSidebar"></aside>
+      <div class="adminMain">
+        <div class="detailPage">
+          <header class="detailHeader">
+            <div>
+              <div class="detailTitle">消息中心</div>
+              <div class="muted">注册审批 + 广播动态</div>
+            </div>
+          </header>
+
+          <main class="detailMain">
+            <div class="topGrid">
+              <div class="panel">
+                <div class="panelTitle">待审批用户</div>
+                <div id="statusText" class="muted"></div>
+                <div id="pendingList" class="judgmentList"></div>
+              </div>
+              <div class="panel">
+                <div class="panelTitle">广播动态</div>
+                <div class="muted">显示所有管理员审批动作</div>
+                <div id="msgStatus" class="muted"></div>
+                <div id="messageList" class="judgmentList"></div>
+              </div>
+            </div>
+          </main>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="/ui/admin/sidebar.js"></script>
+    <script type="module" src="/ui/admin/admin.js"></script>
+  </body>
+</html>
