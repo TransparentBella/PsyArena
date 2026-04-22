@@ -68,6 +68,36 @@
           "audio": { "path": "matches/test2/commentary/c3/test2_audio3.wav", "format": "wav" }
         }
       ]
+    },
+    {
+      "match_id": "test0",
+      "title": "Psy Test 0",
+      "league": "DemoLeague",
+      "date": "2026-04-21",
+      "video": { "path": "matches/test0/psy.mp4" },
+      "commentaries": [
+        {
+          "commentary_id": "test0_c1",
+          "type": "text",
+          "language": "zh",
+          "source": "甲",
+          "text": { "path": "matches/test0/commentary/c1/comment1.txt", "format": "txt" }
+        },
+        {
+          "commentary_id": "test0_c2",
+          "type": "text",
+          "language": "zh",
+          "source": "乙",
+          "text": { "path": "matches/test0/commentary/c2/comment2.txt", "format": "txt" }
+        },
+        {
+          "commentary_id": "test0_c3",
+          "type": "text",
+          "language": "zh",
+          "source": "丙",
+          "text": { "path": "matches/test0/commentary/c3/comment3.txt", "format": "txt" }
+        }
+      ]
     }
   ]
 }

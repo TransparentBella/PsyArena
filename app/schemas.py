@@ -26,6 +26,8 @@ class MatchOut(BaseModel):
     league: str | None = None
     date: str | None = None
     length_sec: int | None = None
+    prompt_label: str | None = None
+    prompt_text: str | list[dict] | dict | None = None
     video: VideoOut
     commentaries: list[CommentaryOut]
 
@@ -33,6 +35,7 @@ class MatchOut(BaseModel):
 class NextTaskResponse(BaseModel):
     user_id: str
     mode: str
+    task_type: str = "video_compare"
     match: MatchOut
 
 

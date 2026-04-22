@@ -73,6 +73,22 @@ from app.schemas import (
 )
 
 ASSIGNMENT_TTL_SECONDS = 15 * 60  # soft lock window for an in-progress task
+TEXT_COMPARE_PROMPT_KEYS = (
+    "prompt_text",
+    "source_text",
+    "reference_text",
+    "context_text",
+    "input_text",
+    "question",
+    "prompt",
+)
+TEXT_COMPARE_PROMPT_PATH_KEYS = (
+    "prompt_path",
+    "source_text_path",
+    "reference_text_path",
+    "context_text_path",
+    "input_text_path",
+)
 
 
 def _static_url(path: str) -> str:
@@ -132,6 +148,29 @@ def _cover_url(settings: Settings, match: Match) -> str | None:
     if cover_png.exists():
         return _static_url(f"matches/{match.match_id}/cover.png")
     return match.video.url or (_static_url(match.video.path) if match.video.path else None)
+
+
+def _text_compare_prompt(match: Match, data_dir: Path) -> tuple[str | None, str | list[dict[str, Any]] | dict[str, Any] | None]:
+    for key in TEXT_COMPARE_PROMPT_KEYS:
+        value = match.meta.get(key)
+        if isinstance(value, str) and value.strip():
+            return "原始文本", value.strip()
+        if isinstance(value, list):
+            return "原始文本", value
+        if isinstance(value, dict):
+            return "原始文本", value
+
+    for key in TEXT_COMPARE_PROMPT_PATH_KEYS:
+        raw_path = match.meta.get(key)
+        if not isinstance(raw_path, str) or raw_path.strip() == "":
+            continue
+        payload = _read_text_payload(data_dir, raw_path)
+        if payload is not None:
+            return "原始文本", payload
+
+    if match.title and match.title.strip():
+        return "标题", match.title.strip()
+    return None, None
 
 
 def _ranking_items(settings: Settings, manifest: Manifest, ranking_ids: list[str]) -> list[RankingItemOut]:
@@ -203,8 +242,130 @@ def _filter_commentaries(match: Match, mode: str) -> list:
     return filtered
 
 
+def _pick_task_for_user(settings: Settings, manifest: Manifest, user: dict[str, Any], mode: str) -> tuple[Match, list[Any]]:
+    match: Match | None = None
+    eligible_commentaries: list[Any] = []
+
+    with connect(settings.db_path) as conn:
+        now = int(time.time())
+        cleanup_expired_assignments(conn, now=now)
+
+        judged = list_judged_match_ids(conn, str(user["username"]))
+
+        active_match_id = get_active_assignment(conn, user_id=str(user["username"]), now=now)
+        if active_match_id and active_match_id not in judged:
+            maybe_match = manifest.match_by_id.get(active_match_id)
+            if maybe_match:
+                candidate_commentaries = _filter_commentaries(maybe_match, mode)
+                if len(candidate_commentaries) >= 2:
+                    match = maybe_match
+                    eligible_commentaries = candidate_commentaries
+
+        if match is None:
+            candidates = [m for m in manifest.matches if m.match_id not in judged]
+            random.shuffle(candidates)
+            if not candidates:
+                raise HTTPException(status_code=404, detail="no_tasks")
+
+            expires_at = now + ASSIGNMENT_TTL_SECONDS
+            unavailable_for_mode: list[str] = []
+
+            for candidate in candidates:
+                if not try_lock_assignment(
+                    conn,
+                    match_id=candidate.match_id,
+                    user_id=str(user["username"]),
+                    expires_at=expires_at,
+                ):
+                    continue
+
+                candidate_commentaries = _filter_commentaries(candidate, mode)
+                if len(candidate_commentaries) < 2:
+                    conn.execute(
+                        """
+                        UPDATE assignments
+                        SET status = 'expired'
+                        WHERE match_id = ? AND user_id = ? AND status = 'assigning'
+                        """,
+                        (candidate.match_id, str(user["username"])),
+                    )
+                    conn.commit()
+                    unavailable_for_mode.append(candidate.match_id)
+                    continue
+
+                match = candidate
+                eligible_commentaries = candidate_commentaries
+                break
+
+            if match is None:
+                detail = "no_tasks_for_mode" if unavailable_for_mode else "no_tasks"
+                raise HTTPException(status_code=404, detail=detail)
+
+    return match, eligible_commentaries
+
+
+def _build_next_task_response(
+    *,
+    settings: Settings,
+    user: dict[str, Any],
+    match: Match,
+    commentaries: list[Any],
+    mode: str,
+    inline_text: bool,
+    task_type: str,
+    include_video: bool,
+    include_audio: bool,
+) -> NextTaskResponse:
+    prompt_label, prompt_text = _text_compare_prompt(match, settings.data_dir)
+    video_url = match.video.url or (_static_url(match.video.path) if match.video.path else None)
+    match_out = MatchOut(
+        match_id=match.match_id,
+        title=match.title,
+        league=match.league,
+        date=match.date,
+        length_sec=match.length_sec,
+        prompt_label=prompt_label,
+        prompt_text=prompt_text,
+        video=VideoOut(url=(video_url if include_video else None), sha256=(match.video.sha256 if include_video else None)),
+        commentaries=[],
+    )
+
+    for c in commentaries:
+        text_url = _static_url(c.text.path) if c.text and c.text.path else None
+        raw_audio_url = c.audio.url if c.audio and c.audio.url else (_static_url(c.audio.path) if c.audio and c.audio.path else None)
+        audio_url = raw_audio_url if include_audio else None
+        text_payload: str | list[dict[str, Any]] | None = None
+        sync_offset_ms = 0
+        if isinstance(c.alignment, dict):
+            raw_offset = c.alignment.get("sync_offset_ms")
+            if isinstance(raw_offset, int):
+                sync_offset_ms = raw_offset
+        if inline_text and c.text and c.text.path:
+            text_payload = _read_text_payload(settings.data_dir, c.text.path)
+        match_out.commentaries.append(
+            CommentaryOut(
+                commentary_id=c.commentary_id,
+                type=c.type,
+                language=c.language,
+                source=c.source,
+                has_audio=bool(audio_url),
+                sync_offset_ms=(sync_offset_ms if include_audio else 0),
+                text=text_payload,
+                text_url=text_url,
+                audio_url=audio_url,
+            )
+        )
+
+    return NextTaskResponse(
+        user_id=str(user["username"]),
+        mode=mode,
+        task_type=task_type,
+        match=match_out,
+    )
+
+
 def create_app() -> FastAPI:
-    app = FastAPI(title="CommentRanking API")
+    app = FastAPI(title="PsyRanking API")
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
@@ -518,103 +679,38 @@ def create_app() -> FastAPI:
         effective_mode = (mode or settings.mode).strip().lower()
         if effective_mode not in {"text", "audio", "both"}:
             raise HTTPException(status_code=400, detail="invalid_mode")
-
-        match: Match | None = None
-        eligible_commentaries: list[Any] = []
-
-        with connect(settings.db_path) as conn:
-            now = int(time.time())
-            cleanup_expired_assignments(conn, now=now)
-
-            judged = list_judged_match_ids(conn, str(user["username"]))
-
-            active_match_id = get_active_assignment(conn, user_id=str(user["username"]), now=now)
-            if active_match_id and active_match_id not in judged:
-                maybe_match = manifest.match_by_id.get(active_match_id)
-                if maybe_match:
-                    candidate_commentaries = _filter_commentaries(maybe_match, effective_mode)
-                    if len(candidate_commentaries) >= 2:
-                        match = maybe_match
-                        eligible_commentaries = candidate_commentaries
-
-            if match is None:
-                candidates = [m for m in manifest.matches if m.match_id not in judged]
-                random.shuffle(candidates)
-                if not candidates:
-                    raise HTTPException(status_code=404, detail="no_tasks")
-
-                expires_at = now + ASSIGNMENT_TTL_SECONDS
-                unavailable_for_mode: list[str] = []
-
-                for candidate in candidates:
-                    if not try_lock_assignment(
-                        conn,
-                        match_id=candidate.match_id,
-                        user_id=str(user["username"]),
-                        expires_at=expires_at,
-                    ):
-                        continue
-
-                    candidate_commentaries = _filter_commentaries(candidate, effective_mode)
-                    if len(candidate_commentaries) < 2:
-                        # immediately release the lock so others can pick it up
-                        conn.execute(
-                            """
-                            UPDATE assignments
-                            SET status = 'expired'
-                            WHERE match_id = ? AND user_id = ? AND status = 'assigning'
-                            """,
-                            (candidate.match_id, str(user["username"])),
-                        )
-                        conn.commit()
-                        unavailable_for_mode.append(candidate.match_id)
-                        continue
-
-                    match = candidate
-                    eligible_commentaries = candidate_commentaries
-                    break
-
-                if match is None:
-                    detail = "no_tasks_for_mode" if unavailable_for_mode else "no_tasks"
-                    raise HTTPException(status_code=404, detail=detail)
-
-        video_url = match.video.url or (_static_url(match.video.path) if match.video.path else None)
-        match_out = MatchOut(
-            match_id=match.match_id,
-            title=match.title,
-            league=match.league,
-            date=match.date,
-            length_sec=match.length_sec,
-            video=VideoOut(url=video_url, sha256=match.video.sha256),
-            commentaries=[],
+        match, eligible_commentaries = _pick_task_for_user(settings, manifest, user, effective_mode)
+        return _build_next_task_response(
+            settings=settings,
+            user=user,
+            match=match,
+            commentaries=eligible_commentaries,
+            mode=effective_mode,
+            inline_text=inline_text,
+            task_type="video_compare",
+            include_video=True,
+            include_audio=True,
         )
 
-        for c in eligible_commentaries:
-            text_url = _static_url(c.text.path) if c.text and c.text.path else None
-            audio_url = c.audio.url if c.audio and c.audio.url else (_static_url(c.audio.path) if c.audio and c.audio.path else None)
-            text_payload: str | list[dict[str, Any]] | None = None
-            sync_offset_ms = 0
-            if isinstance(c.alignment, dict):
-                raw_offset = c.alignment.get("sync_offset_ms")
-                if isinstance(raw_offset, int):
-                    sync_offset_ms = raw_offset
-            if inline_text and c.text and c.text.path:
-                text_payload = _read_text_payload(settings.data_dir, c.text.path)
-            match_out.commentaries.append(
-                CommentaryOut(
-                    commentary_id=c.commentary_id,
-                    type=c.type,
-                    language=c.language,
-                    source=c.source,
-                    has_audio=bool(audio_url),
-                    sync_offset_ms=sync_offset_ms,
-                    text=text_payload,
-                    text_url=text_url,
-                    audio_url=audio_url,
-                )
-            )
-
-        return NextTaskResponse(user_id=str(user["username"]), mode=effective_mode, match=match_out)
+    @app.get("/api/tasks/next_text", response_model=NextTaskResponse)
+    def get_next_text_task(
+        inline_text: bool = Query(default=True),
+        cr_session: str | None = Cookie(default=None),
+    ) -> NextTaskResponse:
+        settings, manifest = _require_loaded()
+        user = _require_labeler(_current_user(cr_session))
+        match, eligible_commentaries = _pick_task_for_user(settings, manifest, user, "text")
+        return _build_next_task_response(
+            settings=settings,
+            user=user,
+            match=match,
+            commentaries=eligible_commentaries,
+            mode="text",
+            inline_text=inline_text,
+            task_type="text_compare",
+            include_video=False,
+            include_audio=False,
+        )
 
     @app.post("/api/judgments", response_model=JudgmentOut)
     def post_judgment(

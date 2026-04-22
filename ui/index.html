@@ -3,14 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CommentRanking</title>
+    <title>PsyRanking</title>
     <link rel="stylesheet" href="/ui/style.css" />
   </head>
   <body>
     <div id="app">
       <aside class="sidebar">
         <div class="sidebar__section">
-          <div class="title">CommentRanking</div>
+          <div class="title">PsyRanking</div>
           <div class="muted">人类排序标注演示</div>
         </div>
 
@@ -20,6 +20,7 @@
             <option value="both">文本+音频</option>
             <option value="audio">仅音频</option>
             <option value="text">仅文本</option>
+            <option value="text_compare">纯文本对比</option>
           </select>
           <div class="row">
             <button id="reloadBtn" class="btn btn--ghost">重载</button>
@@ -30,7 +31,7 @@
         </div>
 
         <div class="sidebar__section" id="taskInfoSection">
-          <div class="label">当前比赛</div>
+          <div class="label">当前任务</div>
           <div id="matchMeta" class="meta muted">未加载</div>
           <div class="meta muted">用户：<span id="userIdText">-</span></div>
           <div class="meta muted">进度：<span id="progressText">0</span></div>
@@ -45,6 +46,10 @@
       </aside>
 
       <main class="main">
+        <section id="promptSection" class="promptSection" hidden>
+          <div id="promptLabel" class="promptSection__label">原始文本</div>
+          <div id="promptText" class="promptSection__content"></div>
+        </section>
         <section class="videoSection">
           <video id="video" class="video" controls playsinline></video>
         </section>

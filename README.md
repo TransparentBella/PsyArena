@@ -1,13 +1,7 @@
-好的，根据你目前所有的规划、代码逻辑变更以及 Bug 排查记录，我为你拟写了这份 **README.md**。这份文件不仅包含了项目的目标和架构，还详细记录了本周的进度、关键逻辑的迭代（特别是针对用户系统和任务分发的调整）以及已解决的问题。
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-.\.venv-arena\Scripts\Activate.ps1
----
-d:\Study\Programming\etrip\etrip心理\arena\.venv-arena\Scripts\python.exe -m uvicorn app.main:app --reload --port 8010
-
-# CommentRanking Demo
+# PsyRanking Demo
 
 ## 1. 项目简介
-**CommentRanking Demo** 是一个专门用于收集人类对体育比赛解说（文本/音频）偏好的标注平台。通过“视频播放 + 多源解说对比 + 拖拽排序”的交互方式，系统能够收集高质量的 Ranking 数据，并最终导出为标准的数据集格式（JSONL/CSV），用于训练或评估多模态大模型在体育评论领域的表现。
+**PsyRanking Demo** 是一个专门用于收集人类对心理咨询答复偏好的标注平台。通过“视频播放 + 多源回复对比 + 拖拽排序”的交互方式，系统能够收集高质量的 Ranking 数据，并最终导出为标准的数据集格式（JSONL/CSV），用于训练或评估多模态大模型在心理咨询领域的表现。
 
 ## 2. 核心架构
 - **前端**：采用“零构建”方案（原生 HTML5 + JS + CSS3），由后端直接托管。支持视频与多路音频同步播放、拖拽排序卡片、管理员消息中心。
@@ -32,7 +26,7 @@ d:\Study\Programming\etrip\etrip心理\arena\.venv-arena\Scripts\python.exe -m u
 - **消息中心 (Inbox)**：
   - **审批流**：管理员可处理新用户注册申请。
   - **广播动态**：实时展示管理员的操作审计日志（如：某管理员审批了某用户）。
-- **统计分析**：支持查看单场比赛的标注详情及初步的 Ranking 统计（AvgRank）。
+- **统计分析**：支持查看心理咨询的标注详情及初步的 Ranking 统计（AvgRank）。
 
 ### 🛠 关键逻辑迭代与修复
 1. **任务分发策略调整**：
@@ -47,10 +41,10 @@ d:\Study\Programming\etrip\etrip心理\arena\.venv-arena\Scripts\python.exe -m u
 ```bash
 arena/data/
 ├── manifest.json              # 数据全局索引
-└── matches/                   # 比赛原始素材
-    └── {match_id}/            # 唯一比赛 ID
+└── matches/                   # 原始素材
+    └── {match_id}/            # 唯一咨询 ID
         ├── video.mp4          # 视频文件
-        └── commentary/        # 多源解说（.wav / .json）
+        └── commentary/        # 多源咨询回复（.wav / .json）
 ```
 
 ### manifest.json 关键字段
@@ -85,17 +79,17 @@ arena/data/
 
 ## 7. 本周更新（wk2）
 
-- **解说数据改为“音文配对”组织。**  
-  技术实现：`data/matches/{match_id}/commentary/cN/` 统一存放同一条解说的文本与音频，后端按 `text.path` 必填、`audio` 可空解析。
+- **回复数据改为“音文配对”组织。**  
+  技术实现：`data/matches/{match_id}/commentary/cN/` 统一存放同一条回复的文本与音频，后端按 `text.path` 必填、`audio` 可空解析。
 
-- **文本解说支持 `txt/json` 两种格式。**  
+- **文本回复支持 `txt/json` 两种格式。**  
   技术实现：后端读取文本时先自动识别 JSON，再回退纯文本字符串，接口统一返回可渲染的 `text` 字段。
 
 - **任务分发按资源可用性过滤，不再依赖旧 type 逻辑。**  
   技术实现：`mode=both/text` 返回有文本项，`mode=audio` 返回有音频项，并在任务接口补充 `has_audio`。
 
 - **音视频联动播放更稳定。**  
-  技术实现：点击解说音频后建立同一时间轴，拖动音频同步视频，音频结束后视频静音续播，并支持 `sync_offset_ms` 对齐扩展。
+  技术实现：点击回复音频后建立同一时间轴，拖动音频同步视频，音频结束后视频静音续播，并支持 `sync_offset_ms` 对齐扩展。
 
 - **标注页交互空间优化。**  
   技术实现：顶部控制区精简，视频与列表间加入可拖拽分界线，动态调整视频高度并持久化到本地存储。
@@ -116,7 +110,7 @@ arena/data/
 每一行是一个完整的标注结果（一个 JSON 对象），常用字段如下：
 
 - `judgment_id`：这条标注记录的唯一编号。  
-- `match_id`：对应哪场比赛。  
+- `match_id`：对应哪个回复。  
 - `labeler_id`：是哪位标注员提交的。  
 - `created_at`：提交时间。  
 - `mode`：标注模式（`audio` / `text` / `both`）。  
@@ -124,15 +118,15 @@ arena/data/
 - `reason`：人工备注（可为空）。  
 - `flags`：附加信息（例如是否 `skipped`、浏览器信息等）。
 
-- `ranking_ids`：解说 ID 的排序结果（从好到坏）。  
+- `ranking_ids`：回复 ID 的排序结果（从好到坏）。  
 - `ranking`：对 `ranking_ids` 的可读化展开，每个元素包含：  
   - `rank`：名次  
-  - `id`：解说 ID  
-  - `source/language/type`：解说来源、语言、类型  
+  - `id`：回复 ID  
+  - `source/language/type`：回复来源、语言、类型  
   - `text_snapshot`：文本摘要  
   - `audio_url_or_path`：音频地址或路径
 
-- `match`：比赛快照信息，包含 `title/league/date/length_sec/video`，用于导出后仍可追溯当时任务上下文。
+- `match`：咨询快照信息，包含 `title/league/date/length_sec/video`，用于导出后仍可追溯当时任务上下文。
 
 ---
 
@@ -141,5 +135,5 @@ arena/data/
 
 ---
 
-这份 README 覆盖了你从后端架构到前端交互，再到最近修复的“任务分发”和“缓存 Bug”的所有核心细节。直接保存为项目的 `README.md` 即可！
+
 

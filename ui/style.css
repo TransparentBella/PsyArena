@@ -212,6 +212,34 @@ body {
   overflow: hidden;
 }
 
+.promptSection {
+  margin: 10px 16px 6px 16px;
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+  overflow: auto;
+}
+
+.promptSection__label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+.promptSection__content {
+  white-space: pre-wrap;
+  line-height: 1.65;
+}
+
+.promptSection__content pre {
+  margin: 0;
+  white-space: pre-wrap;
+  font: inherit;
+}
+
 .videoSection {
   padding: 10px 16px 6px 16px;
   position: sticky;
@@ -250,6 +278,15 @@ body {
   border-radius: 14px;
   border: 1px solid var(--border);
   object-fit: contain;
+}
+
+#app.app--text-compare .promptSection {
+  display: block;
+}
+
+#app.app--text-compare .videoSection,
+#app.app--text-compare .videoResizeHandle {
+  display: none;
 }
 
 .sortSection {

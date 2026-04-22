@@ -47,8 +47,10 @@ async function apiFetch(path, options = {}) {
 }
 
 async function getNextTask({ mode }) {
-  const url = new URL(`${API_BASE}/api/tasks/next`, window.location.origin);
-  if (mode) url.searchParams.set("mode", mode);
+  const isTextCompare = mode === "text_compare";
+  const path = isTextCompare ? "/api/tasks/next_text" : "/api/tasks/next";
+  const url = new URL(`${API_BASE}${path}`, window.location.origin);
+  if (mode && !isTextCompare) url.searchParams.set("mode", mode);
   url.searchParams.set("inline_text", "true");
   const res = await apiFetch(url.pathname + url.search);
   return await res.json();
@@ -108,6 +110,7 @@ const EDGE_SCROLL_MIN_PX = 2;
 const EDGE_SCROLL_MAX_PX = 18;
 
 const els = {
+  app: qs("app"),
   modeSelect: qs("modeSelect"),
   modeLabel: qs("modeLabel"),
   reloadBtn: qs("reloadBtn"),
@@ -121,6 +124,9 @@ const els = {
   rankedCompactToggle: qs("rankedCompactToggle"),
   videoResizeHandle: qs("videoResizeHandle"),
   statusText: qs("statusText"),
+  promptSection: qs("promptSection"),
+  promptLabel: qs("promptLabel"),
+  promptText: qs("promptText"),
   video: qs("video"),
   unrankedList: qs("unrankedList"),
   rankedList: qs("rankedList"),
@@ -148,6 +154,10 @@ document.addEventListener("DOMContentLoaded", uiReset, { once: true });
 
 function setStatus(text) {
   els.statusText.textContent = text || "";
+}
+
+function isTextCompareMode(mode) {
+  return mode === "text_compare";
 }
 
 function getVideoHeightMaxVh() {
@@ -287,6 +297,7 @@ function syncAudioUiState() {
 }
 
 function syncVideoToActiveAudio() {
+  if (!els.video.src) return;
   if (!state.activeAudioId) return;
   const audio = getAudioByCommentaryId(state.activeAudioId);
   if (!audio) return;
@@ -300,6 +311,7 @@ function syncVideoToActiveAudio() {
 function setActiveAudio(commentaryId, { restart = false, fromAudioEvent = false } = {}) {
   const commentary = getCommentaryById(commentaryId);
   if (!commentary || !commentary.audio_url) return;
+  if (!els.video.src) return;
   const audio = getAudioByCommentaryId(commentaryId);
   if (!audio) return;
 
@@ -332,11 +344,13 @@ function resetPlaybackState() {
   state.activeAudioMuted = false;
   state.activeSyncOffsetMs = 0;
   state.syncMode = "video_only";
+  els.video.pause();
   els.video.muted = false;
   syncAudioUiState();
 }
 
 function startVideoAutoplay() {
+  if (!els.video.src) return;
   els.video.muted = false;
   const p = els.video.play();
   if (p && typeof p.catch === "function") {
@@ -348,7 +362,7 @@ function startVideoAutoplay() {
 
 function seekToMs(tMs) {
   const sec = clamp((tMs || 0) / 1000, 0, Number.MAX_SAFE_INTEGER);
-  els.video.currentTime = sec;
+  if (els.video.src) els.video.currentTime = sec;
   const audio = state.activeAudioId ? getAudioByCommentaryId(state.activeAudioId) : null;
   if (audio) {
     const offsetSec = (state.activeSyncOffsetMs || 0) / 1000;
@@ -364,6 +378,35 @@ function setVideoSource(task) {
   const url = task.match.video?.url || "";
   resetPlaybackState();
   els.video.src = url;
+  els.video.load();
+}
+
+function renderPromptContent(promptText) {
+  els.promptText.innerHTML = "";
+  if (promptText == null) {
+    els.promptText.textContent = "当前任务未提供原始文本。";
+    return;
+  }
+  if (typeof promptText === "string") {
+    els.promptText.textContent = promptText;
+    return;
+  }
+  const pre = document.createElement("pre");
+  pre.textContent = JSON.stringify(promptText, null, 2);
+  els.promptText.appendChild(pre);
+}
+
+function applyTaskView(task) {
+  const isTextCompareTask = task?.task_type === "text_compare" || isTextCompareMode(state.mode);
+  els.app.classList.toggle("app--text-compare", isTextCompareTask);
+  els.promptSection.hidden = !isTextCompareTask;
+  if (isTextCompareTask) {
+    els.promptLabel.textContent = task?.match?.prompt_label || "原始文本";
+    renderPromptContent(task?.match?.prompt_text);
+    return;
+  }
+  els.promptLabel.textContent = "原始文本";
+  els.promptText.textContent = "";
 }
 
 function clearLists() {
@@ -899,6 +942,7 @@ async function loadFirstTask() {
     state.tasks = [task];
     state.index = 0;
     state.startedAtMs = performance.now();
+    applyTaskView(task);
     setVideoSource(task);
     setStatus("");
     renderLists();
@@ -911,6 +955,7 @@ async function loadFirstTask() {
     setStatus(String(e.message || e));
     state.tasks = [];
     state.index = -1;
+    applyTaskView(null);
     renderLists();
   }
 }
@@ -932,13 +977,7 @@ async function checkAuth() {
     els.completionExportJsonl.style.display = isAdmin ? "inline-flex" : "none";
     els.completionExportCsv.style.display = isAdmin ? "inline-flex" : "none";
     if (!isAdmin) {
-      // labeler sidebar should only keep logout
-      els.modeLabel.hidden = true;
-      els.modeSelect.hidden = true;
-      els.reloadBtn.style.display = "none";
       if (statsLink) statsLink.style.display = "none";
-      els.taskInfoSection.hidden = true;
-      els.navSection.hidden = true;
     }
     if (isAdmin) {
       window.location.href = "/ui/stats/";
@@ -968,7 +1007,7 @@ async function gotoNextTask({ allowSkipSubmit }) {
         await postJudgment({
           match_id: cur.match.match_id,
           commentary_ids: fullOrder,
-          mode: state.mode,
+          mode: isTextCompareMode(state.mode) ? "text" : state.mode,
           latency_ms: null,
           reason: null,
           flags: { skipped: true, browser_info: browserInfo() },
@@ -983,6 +1022,7 @@ async function gotoNextTask({ allowSkipSubmit }) {
   if (state.index < state.tasks.length - 1) {
     state.index += 1;
     const task = getCurrentTask();
+    applyTaskView(task);
     setVideoSource(task);
     renderLists();
     startVideoAutoplay();
@@ -994,6 +1034,7 @@ async function gotoNextTask({ allowSkipSubmit }) {
     const next = await getNextTask({ mode: state.mode });
     state.tasks.push(next);
     state.index = state.tasks.length - 1;
+    applyTaskView(next);
     setVideoSource(next);
     setStatus("");
     renderLists();
@@ -1011,6 +1052,7 @@ function gotoPrevTask() {
   if (state.index <= 0) return;
   state.index -= 1;
   const task = getCurrentTask();
+  applyTaskView(task);
   setVideoSource(task);
   renderLists();
   startVideoAutoplay();
@@ -1028,7 +1070,7 @@ async function submitCurrent() {
     await postJudgment({
       match_id: task.match.match_id,
       commentary_ids: [...st.ranked],
-      mode: state.mode,
+      mode: isTextCompareMode(state.mode) ? "text" : state.mode,
       latency_ms: Math.floor(performance.now() - startedAt),
       reason: null,
       flags: { browser_info: browserInfo() },

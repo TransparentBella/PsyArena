@@ -63,7 +63,7 @@ export async function initAdminSidebar() {
 
   root.innerHTML = `
     <div class="adminSidebar__section">
-      <div class="adminSidebar__title">管理控制台</div>
+      <div class="adminSidebar__title">PsyRanking</div>
       <div class="muted">管理员：${me.nickname || me.username}</div>
     </div>
 
