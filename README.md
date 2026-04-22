@@ -131,7 +131,7 @@ arena/data/
 ---
 
 ## 9. 贡献者
-**Admin Team**: wsq, hjn, sy, csk, mjz, xyc
+**Admin Team**: wsq, ljt, yxp, rxy, yyh
 
 ---
 
